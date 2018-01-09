@@ -23,7 +23,7 @@ class TestMonitor(TestCase):
         with open(TEST_CONFIG, 'w') as f:
             config.write(f)
 
-        with mock.patch('clearblade.ClearBladeCore.System', MockSystem) as m:
+        with mock.patch('clearblade.ClearBladeCore.System') as m:
             with self.assertRaises(KeyError):
                 monitor = Monitor(TEST_CONFIG)
 
@@ -34,7 +34,7 @@ class TestMonitor(TestCase):
         with open(TEST_CONFIG, 'w') as f:
             config.write(f)
 
-        with mock.patch('clearblade.ClearBladeCore.System', MockSystem) as m:
+        with mock.patch('clearblade.ClearBladeCore.System') as m:
             with self.assertRaises(KeyError):
                 monitor = Monitor(TEST_CONFIG)
 
@@ -42,10 +42,25 @@ class TestMonitor(TestCase):
         config = ConfigParser()
         config['system'] = {'key': 'testkey', 'secret': 'testsecret'}
         config['device'] = {'name': 'testname', 'active_key': 'testactivekey'}
+        with open(TEST_CONFIG, 'w') as f:
+            config.write(f)
 
-        with mock.patch('clearblade.ClearBladeCore.System', MockSystem) as m:
+        with mock.patch('clearblade.ClearBladeCore.System.Device') as m:
+            m.return_value = None
             with self.assertRaises(KeyError):
                 monitor = Monitor(TEST_CONFIG)
+
+    def test_new_monitor_happy_case(self):
+        config = ConfigParser()
+        config['system'] = {'key': 'testkey', 'secret': 'testsecret'}
+        config['device'] = {'name': 'testname', 'active_key': 'testactivekey'}
+        config['messaging'] = {'channel': '/test/channel'}
+        with open(TEST_CONFIG, 'w') as f:
+            config.write(f)
+
+        with mock.patch('clearblade.ClearBladeCore.System.Device') as m:
+            monitor = Monitor(TEST_CONFIG)
+            self.assertEqual('/test/channel', monitor.channel)
 
 
 class MockSystem:
@@ -54,7 +69,7 @@ class MockSystem:
         pass
 
     def Device(self, *args):
-        pass
+        return None
 
     def Messaging(self, *args):
-        pass
+        return None
