@@ -61,15 +61,3 @@ class TestMonitor(TestCase):
         with mock.patch('clearblade.ClearBladeCore.System.Device') as m:
             monitor = Monitor(TEST_CONFIG)
             self.assertEqual('/test/channel', monitor.channel)
-
-
-class MockSystem:
-
-    def __init__(self, *args):
-        pass
-
-    def Device(self, *args):
-        return None
-
-    def Messaging(self, *args):
-        return None
