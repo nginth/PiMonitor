@@ -1,2 +1,3 @@
 venv/
 clearblade.ini
+__pycache__

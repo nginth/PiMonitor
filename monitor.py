@@ -1,9 +1,8 @@
+import time
 from configparser import ConfigParser
 from clearblade.ClearBladeCore import System
 from psutil import cpu_percent
-import time
-import signal
-import sys
+from exiter import Exiter
 
 
 def system_from_cfg(config):
@@ -31,17 +30,6 @@ def messaging_from_cfg(config, system, device):
 
     return system.Messaging(device)
 
-
-class Exiter:
-
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.exit)
-        signal.signal(signal.SIGTERM, self.exit)
-        self.should_exit = False
-
-    def exit(self, signum, frame):
-        self.should_exit = True
-
 config = ConfigParser()
 config.read('clearblade.ini')
 system = system_from_cfg(config)
@@ -56,4 +44,5 @@ exiter = Exiter()
 while not exiter.should_exit:
     msg_client.publish(config['messaging']['channel'], cpu_utilization())
     time.sleep(delay)
+
 msg_client.disconnect()
