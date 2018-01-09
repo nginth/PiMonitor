@@ -1,8 +1,6 @@
 import time
 from configparser import ConfigParser
 from clearblade.ClearBladeCore import System
-from psutil import cpu_percent
-from exiter import Exiter
 
 
 class Monitor:
@@ -41,21 +39,3 @@ class Monitor:
 
     def disconnect(self):
         self.msg_client.disconnect()
-
-
-def cpu_utilization():
-    cpu_percent_strs = [str(percent) for percent in cpu_percent(percpu=True)]
-    return ','.join(cpu_percent_strs)
-
-
-if __name__ == '__main__':
-    monitor = Monitor()
-
-    monitor.connect()
-
-    exiter = Exiter()
-    while not exiter.should_exit:
-        monitor.publish(cpu_utilization())
-        time.sleep(5)
-
-    monitor.disconnect()

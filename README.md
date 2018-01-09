@@ -3,7 +3,7 @@ A CPU utilization monitoring service for the Raspberry Pi 3 Model B implemented 
 
 ### Quickstart
 #### Monitor
-First, on the ClearBlade platform, create a new System. Then, create a Device within this system. Next, clone this repository onto the Raspberry Pi and create a config file in the `monitor` directory named `clearblade.ini`. Fill in the details here with the information from the system and device you just created. Feel free to choose any channel name you like.
+First, on the ClearBlade platform, create a new System. Then, create a Device within this system. Next, clone this repository onto the Raspberry Pi and create a config file in the root directory of the project named `clearblade.ini`. Fill in the details here with the information from the system and device you just created. Feel free to choose any channel name you like.
 
 ```ini
 [system]
@@ -44,8 +44,7 @@ python3 -m venv venv
 # install dependencies
 pip install -r requirements.txt
 # run monitor
-cd monitor
-python monitor.py
+python run.py
 ```
 
 You should see rows start to show up on the Collection page on the ClearBlade platform.
