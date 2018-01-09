@@ -2,6 +2,8 @@ from configparser import ConfigParser
 from clearblade.ClearBladeCore import System
 from psutil import cpu_percent
 import time
+import signal
+import sys
 
 
 def system_from_cfg(config):
@@ -27,23 +29,31 @@ def messaging_from_cfg(config, system, device):
     if 'messaging' not in config:
         raise KeyError('Messaging key not found in clearblade.ini.')
 
-    msg_client = system.Messaging(device)
+    return system.Messaging(device)
 
-    def on_connect(client, userdata, flags, rc):
-        client.publish(config['messaging']['channel'], cpu_utilization())
 
-    msg_client.on_connect = on_connect
+class Exiter:
 
-    return msg_client
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit)
+        signal.signal(signal.SIGTERM, self.exit)
+        self.should_exit = False
 
+    def exit(self, signum, frame):
+        self.should_exit = True
 
 config = ConfigParser()
 config.read('clearblade.ini')
 system = system_from_cfg(config)
 device = device_from_cfg(config, system)
-
 msg_client = messaging_from_cfg(config, system, device)
+delay = int(config['messaging']['delay']) if 'delay' in config[
+    'messaging'] else 5
 
 msg_client.connect()
-time.sleep(10)
+
+exiter = Exiter()
+while not exiter.should_exit:
+    msg_client.publish(config['messaging']['channel'], cpu_utilization())
+    time.sleep(delay)
 msg_client.disconnect()
