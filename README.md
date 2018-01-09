@@ -42,10 +42,15 @@ Finally, install and run the monitor.
 python3 -m venv venv
 . venv/bin/activate
 # install dependencies
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 # run monitor
-python run.py
+python3 run.py
 ```
 
 You should see rows start to show up on the Collection page on the ClearBlade platform.
+
+### Testing
+```bash
+python3 run_tests.py
+```
 
