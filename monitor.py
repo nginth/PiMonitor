@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from clearblade.ClearBladeCore import System
+from psutil import cpu_percent
 import time
 
 
@@ -18,7 +19,8 @@ def device_from_cfg(config, system):
 
 
 def cpu_utilization():
-    return 'test'
+    cpu_percent_strs = [str(percent) for percent in cpu_percent(percpu=True)]
+    return ','.join(cpu_percent_strs)
 
 
 def messaging_from_cfg(config, system, device):
