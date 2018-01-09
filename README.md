@@ -47,10 +47,13 @@ pip3 install -r requirements.txt
 python3 run.py
 ```
 
-You should see rows start to show up on the Collection page on the ClearBlade platform.
+You should see rows start to show up on the Collection page on the ClearBlade platform. A message will be sent every 5 seconds to the ClearBlade platform with the percentage usage of each core of your cpus. 
 
 ### Testing
 ```bash
 python3 run_tests.py
 ```
+
+### Assumptions
+This program is tailored for use on a Raspberry Pi 3 Model B. As such, this program assumes that the CPU of the machine it is running on has 4 (and only 4) cores. 
 
