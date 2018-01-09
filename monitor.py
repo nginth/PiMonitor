@@ -17,8 +17,22 @@ def device_from_cfg(config, system):
     return system.Device(config['device']['name'], config['device']['active_key'])
 
 
+def cpu_utilization():
+    return 'test'
+
+
 def messaging_from_cfg(config, system, device):
-    return system.Messaging(device)
+    if 'messaging' not in config:
+        raise KeyError('Messaging key not found in clearblade.ini.')
+
+    msg_client = system.Messaging(device)
+
+    def on_connect(client, userdata, flags, rc):
+        client.publish(config['messaging']['channel'], cpu_utilization())
+
+    msg_client.on_connect = on_connect
+
+    return msg_client
 
 
 config = ConfigParser()
@@ -28,11 +42,6 @@ device = device_from_cfg(config, system)
 
 msg_client = messaging_from_cfg(config, system, device)
 
-
-def on_connect(client, userdata, flags, rc):
-    client.publish('/rpi/cpu_usage', 'test')
-
-msg_client.on_connect = on_connect
 msg_client.connect()
 time.sleep(10)
 msg_client.disconnect()
