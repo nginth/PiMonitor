@@ -5,18 +5,42 @@ from psutil import cpu_percent
 from exiter import Exiter
 
 
-def system_from_cfg(config):
-    if 'system' not in config:
-        raise KeyError('System key not found in clearblade.ini.')
+class Monitor:
 
-    return System(config['system']['key'], config['system']['secret'])
+    def __init__(self, filename='clearblade.ini'):
+        self.config = ConfigParser()
+        self.config.read(filename)
+        self.system = self._system_from_cfg()
+        self.device = self._device_from_cfg()
+        self.msg_client = self._messaging_from_cfg()
+        self.channel = self.config['messaging']['channel']
 
+    def _system_from_cfg(self):
+        if 'system' not in self.config:
+            raise KeyError('System key not found in clearblade.ini.')
 
-def device_from_cfg(config, system):
-    if 'device' not in config:
-        raise KeyError('Device key not found in clearblade.ini.')
+        return System(self.config['system']['key'], self.config['system']['secret'])
 
-    return system.Device(config['device']['name'], config['device']['active_key'])
+    def _device_from_cfg(self):
+        if 'device' not in self.config:
+            raise KeyError('Device key not found in clearblade.ini.')
+
+        return self.system.Device(self.config['device']['name'], self.config['device']['active_key'])
+
+    def _messaging_from_cfg(self):
+        if 'messaging' not in self.config:
+            raise KeyError('Messaging key not found in clearblade.ini.')
+
+        return self.system.Messaging(self.device)
+
+    def publish(self, message):
+        self.msg_client.publish(self.channel, message)
+
+    def connect(self):
+        self.msg_client.connect()
+
+    def disconnect(self):
+        self.msg_client.disconnect()
 
 
 def cpu_utilization():
@@ -24,25 +48,14 @@ def cpu_utilization():
     return ','.join(cpu_percent_strs)
 
 
-def messaging_from_cfg(config, system, device):
-    if 'messaging' not in config:
-        raise KeyError('Messaging key not found in clearblade.ini.')
+if __name__ == '__main__':
+    monitor = Monitor()
 
-    return system.Messaging(device)
+    monitor.connect()
 
-config = ConfigParser()
-config.read('clearblade.ini')
-system = system_from_cfg(config)
-device = device_from_cfg(config, system)
-msg_client = messaging_from_cfg(config, system, device)
-delay = int(config['messaging']['delay']) if 'delay' in config[
-    'messaging'] else 5
+    exiter = Exiter()
+    while not exiter.should_exit:
+        monitor.publish(cpu_utilization())
+        time.sleep(5)
 
-msg_client.connect()
-
-exiter = Exiter()
-while not exiter.should_exit:
-    msg_client.publish(config['messaging']['channel'], cpu_utilization())
-    time.sleep(delay)
-
-msg_client.disconnect()
+    monitor.disconnect()
